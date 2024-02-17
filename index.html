@@ -13,20 +13,18 @@
 
     <div id="rss_feed"></div>
 
-<script>
-    function gerarFeed() {
-        var rssUrl = document.getElementById("rss_url").value;
-        fetch("proxy.php?url=" + encodeURIComponent(rssUrl))
-        .then(response => response.text())
-        .then(data => {
-            document.getElementById("rss_feed").innerHTML = data;
-        })
-        .catch(error => {
-            document.getElementById("rss_feed").innerHTML = "<p style='color: red;'>Não foi possível baixar o feed RSS. Verifique se a URL está correta e tente novamente.</p>";
-        });
-    }
-</script>
-
-
+    <script>
+        function gerarFeed() {
+            var rssUrl = document.getElementById("rss_url").value;
+            fetch(rssUrl)
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById("rss_feed").innerHTML = data;
+            })
+            .catch(error => {
+                document.getElementById("rss_feed").innerHTML = "<p style='color: red;'>Não foi possível baixar o feed RSS. Verifique se a URL está correta e tente novamente.</p>";
+            });
+        }
+    </script>
 </body>
 </html>
