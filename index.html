@@ -16,16 +16,14 @@
     <script>
         function gerarFeed() {
             var rssUrl = document.getElementById("rss_url").value;
-            var xhttp = new XMLHttpRequest();
-            xhttp.onreadystatechange = function() {
-                if (this.readyState == 4 && this.status == 200) {
-                    document.getElementById("rss_feed").innerHTML = this.responseText;
-                } else if (this.readyState == 4 && this.status != 200) {
-                    document.getElementById("rss_feed").innerHTML = "<p style='color: red;'>Não foi possível baixar o feed RSS. Verifique se a URL está correta e tente novamente.</p>";
-                }
-            };
-            xhttp.open("GET", "gerar_feed.php?url=" + encodeURIComponent(rssUrl), true);
-            xhttp.send();
+            fetch(rssUrl)
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById("rss_feed").innerHTML = data;
+            })
+            .catch(error => {
+                document.getElementById("rss_feed").innerHTML = "<p style='color: red;'>Não foi possível baixar o feed RSS. Verifique se a URL está correta e tente novamente.</p>";
+            });
         }
     </script>
 </body>
