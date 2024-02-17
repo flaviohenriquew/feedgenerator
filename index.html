@@ -16,8 +16,7 @@
     <script>
         function gerarFeed() {
             var rssUrl = document.getElementById("rss_url").value;
-            console.log("URL do feed RSS:", rssUrl); // Debug: Verifica se a URL está sendo capturada corretamente
-            fetch(rssUrl)
+            fetch("https://cors-anywhere.herokuapp.com/" + rssUrl)
             .then(response => response.text())
             .then(data => {
                 document.getElementById("rss_feed").innerHTML = data;
