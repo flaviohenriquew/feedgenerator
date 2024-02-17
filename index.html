@@ -16,6 +16,7 @@
     <script>
         function gerarFeed() {
             var rssUrl = document.getElementById("rss_url").value;
+            rssUrl = decodeURIComponent(rssUrl); // Decodificar a URL, se estiver codificada
             fetch(rssUrl)
             .then(response => response.text())
             .then(data => {
