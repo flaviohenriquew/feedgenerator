@@ -10,7 +10,7 @@ if (isset($_GET['url'])) {
     // Verifica se o conteúdo foi baixado com sucesso
     if ($rss_content !== false) {
         // Define o cabeçalho como XML para indicar que estamos gerando um feed RSS
-        header('Content-Type: text/plain; charset=utf-8');
+        header('Content-Type: application/rss+xml; charset=utf-8');
 
         // Imprime o conteúdo do feed RSS
         echo $rss_content;
