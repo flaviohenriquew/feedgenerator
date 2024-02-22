@@ -8,8 +8,8 @@ const server = http.createServer(async (req, res) => {
 
     if (pathname !== '/rss') {
         res.writeHead(404);
-        console.log(res);
-        console.log(pathname);
+        console.log('rr',res);
+        console.log('pat',pathname);
         res.end('File not found');
         return;
     }
