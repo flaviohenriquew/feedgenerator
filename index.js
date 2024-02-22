@@ -134,4 +134,10 @@ function generateRssXml(channel, items) {
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
+
+    // Atualiza a página a cada 15 minutos (900000 milissegundos)
+    setInterval(() => {
+        console.log('Página atualizada automaticamente.');
+        // Lógica para atualizar a página aqui
+    }, 900000);
 });
