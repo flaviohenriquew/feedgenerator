@@ -1,30 +1,29 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Feed RSS</title>
+    <title>Feed RSS com filtro</title>
+    <!-- Adiciona o CSS do Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
 </head>
 <body>
-    <h1>Gerador de Feed RSS</h1>
-    <p>Insira a URL do feed RSS (XML) abaixo:</p>
-    <input type="text" id="rss_url" size="50">
-    <button onclick="gerarFeed()">Gerar Feed RSS</button>
-
-    <div id="rss_feed"></div>
-
-    <script>
-        function gerarFeed() {
-            var rssUrl = document.getElementById("rss_url").value;
-            fetch("https://cors-anywhere.herokuapp.com/" + rssUrl)
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById("rss_feed").innerHTML = data;
-            })
-            .catch(error => {
-                document.getElementById("rss_feed").innerHTML = "<p style='color: red;'>Não foi possível baixar o feed RSS. Verifique se a URL está correta e tente novamente.</p>";
-            });
-        }
-    </script>
+    <div class="container mt-5">
+        <h1 class="mb-4">Feed RSS com filtro</h1>
+        <form action="/rss" method="get">
+            <div class="form-group">
+                <label for="url">URL do feed RSS:</label>
+                <input type="url" class="form-control" id="url" name="url" required>
+            </div>
+            <div class="form-group">
+                <label for="keyword">Palavra-chave para filtragem:</label>
+                <input type="text" class="form-control" id="keyword" name="keyword" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Filtrar</button>
+        </form>
+        <a href="/rss?url=URL_DO_FEED&keyword=PALAVRA_CHAVE" class="btn btn-info mt-3">Acessar RSS filtrado</a>
+    </div>
+    <!-- Adiciona o JavaScript do Bootstrap -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 </body>
 </html>
