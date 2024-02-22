@@ -6,9 +6,14 @@ const server = http.createServer(async (req, res) => {
     const parsedUrl = url.parse(req.url, true);
     const { pathname, query } = parsedUrl;
 
+    console.log('Request received:', req.method, parsedUrl);
+
     if (pathname === '/rss') {
         const rssUrl = decodeURIComponent(query.url);
         const keyword = query.keyword;
+
+        console.log('RSS URL:', rssUrl);
+        console.log('Keyword:', keyword);
 
         if (!rssUrl || !keyword) {
             res.writeHead(400);
