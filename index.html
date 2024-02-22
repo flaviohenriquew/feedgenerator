@@ -8,18 +8,18 @@
 <body>
     <div class="container mt-5">
         <h1 class="mb-4">Feed RSS com filtro</h1>
-        <form action="/rss" method="get">
+        <form action="https://flaviohenriquew.github.io/feedgenerator/rss" method="get">
             <div class="form-group">
                 <label for="url">URL do feed RSS:</label>
-                <input type="url" class="form-control" id="url" name="url" required>
+                <input type="url" class="form-control" id="url" name="url" required value="https://bj-share.info/feed.php?u=55179&f&c=1&l&h=61be1053">
             </div>
             <div class="form-group">
                 <label for="keyword">Palavra-chave para filtragem:</label>
-                <input type="text" class="form-control" id="keyword" name="keyword" required>
+                <input type="text" class="form-control" id="keyword" name="keyword" required value="Dual">
             </div>
             <button type="submit" class="btn btn-primary">Filtrar</button>
         </form>
-        <a href="/rss?url=URL_DO_FEED&keyword=PALAVRA_CHAVE" class="btn btn-info mt-3">Acessar RSS filtrado</a>
+        <a href="https://flaviohenriquew.github.io/feedgenerator/rss?url=https%3A%2F%2Fbj-share.info%2Ffeed.php%3Fu%3A55179%3Bf%3Bc%3A1%3Bl%3Bh%3A61be1053&keyword=Dual" class="btn btn-info mt-3">Acessar RSS filtrado</a>
     </div>
     <!-- Adiciona o JavaScript do Bootstrap -->
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
