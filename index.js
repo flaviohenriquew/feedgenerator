@@ -9,7 +9,7 @@ async function startServer() {
         const parsedUrl = url.parse(req.url, true);
         const { pathname, query } = parsedUrl;
 
-        if (pathname === '/rss') {
+        if (pathname === './rss') {
             const rssUrl = decodeURIComponent(query.url);
             const keyword = query.keyword;
 
