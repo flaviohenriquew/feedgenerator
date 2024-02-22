@@ -1,67 +1,85 @@
 const http = require('http');
+const fs = require('fs');
 const url = require('url');
 const { parseString } = require('xml2js');
+const fetch = require('node-fetch');
 
-const server = http.createServer(async (req, res) => {
-    const parsedUrl = url.parse(req.url, true);
-    const { pathname, query } = parsedUrl;
+async function startServer() {
+    const server = http.createServer(async (req, res) => {
+        const parsedUrl = url.parse(req.url, true);
+        const { pathname, query } = parsedUrl;
 
-    console.log('Request received:', req.method, parsedUrl);
+        if (pathname === '/rss') {
+            const rssUrl = decodeURIComponent(query.url);
+            const keyword = query.keyword;
 
-    if (pathname === '/rss') {
-        const rssUrl = decodeURIComponent(query.url);
-        const keyword = query.keyword;
+            console.log('RSS URL:', rssUrl);
+            console.log('Keyword:', keyword);
 
-        console.log('RSS URL:', rssUrl);
-        console.log('Keyword:', keyword);
-
-        if (!rssUrl || !keyword) {
-            res.writeHead(400);
-            res.end('Missing URL or keyword');
-            return;
-        }
-
-        if (!validateUrl(rssUrl)) {
-            res.writeHead(400);
-            res.end('Invalid URL');
-            return;
-        }
-
-        try {
-            const fetch = await import('node-fetch');
-            const response = await fetch.default(rssUrl);
-            if (!response.ok) {
-                throw new Error('Failed to fetch RSS feed');
-            }
-
-            const xmlData = await response.text();
-            const result = await parseString(xmlData, { explicitArray: false });
-
-            const channel = result?.rss?.channel;
-            if (!channel || !Array.isArray(channel.item)) {
-                console.error('Invalid RSS feed structure');
-                res.writeHead(500);
-                res.end('Invalid RSS feed structure');
+            if (!rssUrl || !keyword) {
+                res.writeHead(400);
+                res.end('Missing URL or keyword');
                 return;
             }
 
-            const filteredItems = channel.item.filter(item =>
-                new RegExp(keyword, 'i').test(item.title)
-            );
+            if (!validateUrl(rssUrl)) {
+                res.writeHead(400);
+                res.end('Invalid URL');
+                return;
+            }
 
-            const rssXml = generateRssXml(channel, filteredItems);
-            res.writeHead(200, { 'Content-Type': 'application/xml' });
-            res.end(rssXml);
-        } catch (error) {
-            console.error('Error:', error.message);
-            res.writeHead(500);
-            res.end('Internal Server Error');
+            try {
+                const response = await fetch(rssUrl);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch RSS feed');
+                }
+
+                const xmlData = await response.text();
+                const { rss: { channel: [channel] } } = await parseString(xmlData);
+
+                if (!channel) {
+                    console.error('Invalid RSS feed structure: missing channel');
+                    res.writeHead(500);
+                    res.end('Invalid RSS feed structure: missing channel');
+                    return;
+                }
+
+                const items = Array.isArray(channel.item) ? channel.item : [channel.item];
+                const filteredItems = items.filter(item =>
+                    new RegExp(keyword, 'i').test(item.title)
+                );
+
+                const rssXml = generateRssXml(channel, filteredItems);
+
+                res.writeHead(200, { 'Content-Type': 'application/xml' });
+                res.end(rssXml);
+            } catch (error) {
+                console.error('Error:', error.message);
+                res.writeHead(500);
+                res.end('Internal Server Error');
+            }
+        } else if (pathname === '/') {
+            // Servindo o arquivo index.html
+            fs.readFile('./index.html', (err, data) => {
+                if (err) {
+                    res.writeHead(404);
+                    res.end('File not found');
+                    return;
+                }
+                res.writeHead(200, { 'Content-Type': 'text/html' });
+                res.end(data);
+            });
+        } else {
+            res.writeHead(404);
+            res.end('File not found');
         }
-    } else {
-        res.writeHead(404);
-        res.end('File not found');
-    }
-});
+    });
+
+    const PORT = process.env.PORT || 3000;
+    server.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
+    });
+}
 
 function validateUrl(url) {
     try {
@@ -73,7 +91,6 @@ function validateUrl(url) {
 }
 
 function generateRssXml(channel, items) {
-    console.log(`test`, items);
     const rssItems = items.map(item => `
         <item>
             <title>${item.title}</title>
@@ -83,8 +100,7 @@ function generateRssXml(channel, items) {
         </item>
     `).join('');
 
-    return `
-        <?xml version="1.0" encoding="UTF-8" ?>
+    return `<?xml version="1.0" encoding="UTF-8" ?>
         <rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/">
             <channel>
                 <title>${channel.title}</title>
@@ -98,7 +114,4 @@ function generateRssXml(channel, items) {
     `;
 }
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+startServer();
