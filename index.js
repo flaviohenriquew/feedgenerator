@@ -5,58 +5,55 @@ const { parseString } = require('xml2js');
 const server = http.createServer(async (req, res) => {
     const parsedUrl = url.parse(req.url, true);
     const { pathname, query } = parsedUrl;
-    
-    console.log('entrou pathname');
 
-    if (pathname !== '/rss') {
-        res.writeHead(404);
-        res.end('File not found');
-        return;
-    }
+    if (pathname === '/rss') {
+        const { url: rssUrl, keyword } = query;
 
-    const { url: rssUrl, keyword } = query;
-
-    if (!rssUrl || !keyword) {
-        res.writeHead(400);
-        res.end('Missing URL or keyword');
-        return;
-    }
-
-    if (!validateUrl(rssUrl)) {
-        res.writeHead(400);
-        res.end('Invalid URL');
-        return;
-    }
-
-    try {
-        const fetch = await import('node-fetch');
-        const response = await fetch.default(rssUrl);
-        if (!response.ok) {
-            throw new Error('Failed to fetch RSS feed');
-        }
-
-        const xmlData = await response.text();
-        const result = await parseString(xmlData, { explicitArray: false });
-
-        const channel = result?.rss?.channel;
-        if (!channel || !Array.isArray(channel.item)) {
-            console.error('Invalid RSS feed structure');
-            res.writeHead(500);
-            res.end('Invalid RSS feed structure');
+        if (!rssUrl || !keyword) {
+            res.writeHead(400);
+            res.end('Missing URL or keyword');
             return;
         }
 
-        const filteredItems = channel.item.filter(item =>
-            new RegExp(keyword, 'i').test(item.title)
-        );
+        if (!validateUrl(rssUrl)) {
+            res.writeHead(400);
+            res.end('Invalid URL');
+            return;
+        }
 
-        const rssXml = generateRssXml(channel, filteredItems);
-        res.writeHead(200, { 'Content-Type': 'application/xml' });
-        res.end(rssXml);
-    } catch (error) {
-        console.error('Error:', error.message);
-        res.writeHead(500);
-        res.end('Internal Server Error');
+        try {
+            const fetch = await import('node-fetch');
+            const response = await fetch.default(rssUrl);
+            if (!response.ok) {
+                throw new Error('Failed to fetch RSS feed');
+            }
+
+            const xmlData = await response.text();
+            const result = await parseString(xmlData, { explicitArray: false });
+
+            const channel = result?.rss?.channel;
+            if (!channel || !Array.isArray(channel.item)) {
+                console.error('Invalid RSS feed structure');
+                res.writeHead(500);
+                res.end('Invalid RSS feed structure');
+                return;
+            }
+
+            const filteredItems = channel.item.filter(item =>
+                new RegExp(keyword, 'i').test(item.title)
+            );
+
+            const rssXml = generateRssXml(channel, filteredItems);
+            res.writeHead(200, { 'Content-Type': 'application/xml' });
+            res.end(rssXml);
+        } catch (error) {
+            console.error('Error:', error.message);
+            res.writeHead(500);
+            res.end('Internal Server Error');
+        }
+    } else {
+        res.writeHead(404);
+        res.end('File not found');
     }
 });
 
