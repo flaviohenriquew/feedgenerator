@@ -1,6 +1,16 @@
 const http = require('http');
 const url = require('url');
 const { parseString } = require('xml2js');
+const fetch = require('node-fetch'); // Importar o módulo diretamente
+
+function validateUrl(url) {
+    try {
+        new URL(url);
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
 
 const server = http.createServer(async (req, res) => {
     const queryObject = url.parse(req.url, true).query;
@@ -19,8 +29,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     try {
-        const fetch = await import('node-fetch');
-        const response = await fetch.default(rssUrl);
+        const response = await fetch(rssUrl); // Removido ".default"
         if (!response.ok) {
             throw new Error('Failed to fetch RSS feed');
         }
@@ -49,15 +58,6 @@ const server = http.createServer(async (req, res) => {
         res.end('Internal Server Error');
     }
 });
-
-function validateUrl(url) {
-    try {
-        new URL(url);
-        return true;
-    } catch (error) {
-        return false;
-    }
-}
 
 function generateRssXml(channel, items) {
     console.log(`test`,items);
