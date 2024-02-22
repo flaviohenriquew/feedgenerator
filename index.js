@@ -5,11 +5,11 @@ const { parseString } = require('xml2js');
 const server = http.createServer(async (req, res) => {
     const parsedUrl = url.parse(req.url, true);
     const { pathname, query } = parsedUrl;
+    
+    console.log('entrou pathname');
 
     if (pathname !== '/rss') {
         res.writeHead(404);
-        console.log('rr',res);
-        console.log('pat',pathname);
         res.end('File not found');
         return;
     }
