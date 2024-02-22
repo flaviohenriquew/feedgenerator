@@ -11,9 +11,9 @@ const server = http.createServer(async (req, res) => {
     const rssUrl = decodeURIComponent(query.url);
     const keyword = query.keyword;
 
-    console.log("pathname:", pathname);
-    console.log("RSS URL:", rssUrl);
-    console.log("Keyword:", keyword);
+//    console.log("pathname:", pathname);
+//    console.log("RSS URL:", rssUrl);
+//    console.log("Keyword:", keyword);
 
     if (!rssUrl || !keyword) {
       res.writeHead(400);
@@ -78,7 +78,7 @@ const server = http.createServer(async (req, res) => {
         'Content-Type': 'application/xml',
         'Refresh': '900' // Atualiza a página automaticamente a cada 900 segundos (15 minutos)
       });
-      console.log(rssXml);
+  //    console.log(rssXml);
       res.end(rssXml);
     } catch (error) {
       console.error("Error:", error.message);
