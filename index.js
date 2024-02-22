@@ -8,7 +8,7 @@ const server = http.createServer(async (req, res) => {
 
     if (pathname !== '/rss') {
         res.writeHead(404);
-        res.end('Not Found');
+        res.end('File not found');
         return;
     }
 
@@ -68,7 +68,7 @@ function validateUrl(url) {
 }
 
 function generateRssXml(channel, items) {
-    console.log(`test`,items);
+    console.log(`test`, items);
     const rssItems = items.map(item => `
         <item>
             <title>${item.title}</title>
