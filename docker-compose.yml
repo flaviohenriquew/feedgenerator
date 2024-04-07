@@ -7,9 +7,10 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "3001:3001"
     volumes:
       - .:/app
     environment:
-      - PORT=3000
+      - PORT=3001
     command: ["npm", "start"]
+    restart: always

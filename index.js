@@ -6,14 +6,24 @@ const { parseString } = require("xml2js");
 const server = http.createServer(async (req, res) => {
   const parsedUrl = url.parse(req.url, true);
   const { pathname, query } = parsedUrl;
+  const decodedUrl = decodeURIComponent(req.url);
+
+  if (req.headers.referer) {
+    let referer = req.headers.referer;
+    if (referer.endsWith("/")) {
+      referer = referer.slice(0, -1) + decodedUrl;
+    }
+    console.log(referer);
+    res.setHeader("X-Referer", referer);
+  }
 
   if (pathname.startsWith("/rss")) {
     const rssUrl = decodeURIComponent(query.url);
     const keyword = query.keyword;
 
-    console.log("pathname:", pathname);
-    console.log("RSS URL:", rssUrl);
-    console.log("Keyword:", keyword);
+    // console.log("pathname:", pathname);
+    // console.log("RSS URL:", rssUrl);
+    // console.log("Keyword:", keyword);
 
     if (!rssUrl || !keyword) {
       res.writeHead(400);
@@ -30,6 +40,7 @@ const server = http.createServer(async (req, res) => {
     try {
       const fetch = await import("node-fetch");
       const response = await fetch.default(rssUrl);
+
       if (!response.ok) {
         console.log(response);
         throw new Error("Failed to fetch RSS feed");
@@ -139,7 +150,7 @@ function generateRssXml(channel, items) {
     `;
 }
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

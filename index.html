@@ -46,5 +46,16 @@
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script>
+      fetch(
+        "https://feedgenerator.tech/rss?url=https://bj-share.info/feed.php?u:184515;f;c:1;l;h:3f9d0d45&keyword=Dual"
+      ) // Faça uma solicitação para o servidor
+        .then((response) => {
+          const referer = response.headers.get("X-Referer"); // Acessando o cabeçalho personalizado
+          console.log("Referer:", referer); // Exibindo o referer no console do navegador
+          return response.text();
+        })
+        .catch((error) => console.error("Ocorreu um erro:", error));
+    </script>
   </body>
 </html>
