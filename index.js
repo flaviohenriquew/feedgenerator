@@ -2,6 +2,7 @@ const http = require("http");
 const fs = require("fs");
 const url = require("url");
 const { parseString } = require("xml2js");
+const fetch = require("node-fetch");
 
 const server = http.createServer(async (req, res) => {
   const parsedUrl = url.parse(req.url, true);
@@ -38,7 +39,6 @@ const server = http.createServer(async (req, res) => {
     }
 
     try {
-      const fetch = await import("node-fetch");
       const response = await fetch.default(rssUrl);
 
       if (!response.ok) {
@@ -96,6 +96,41 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(500);
       res.end("Internal Server Error");
     }
+  } else if (pathname.startsWith("/ordenar")) {
+    // Novo endpoint para ordenar a playlist .m3u
+    const playlistUrl = decodeURIComponent(query.url);
+
+    if (!playlistUrl) {
+      res.writeHead(400);
+      res.end("Missing URL");
+      return;
+    }
+
+    if (!validateUrl(playlistUrl)) {
+      res.writeHead(400);
+      res.end("Invalid URL");
+      return;
+    }
+
+    try {
+      const response = await fetch(playlistUrl);
+      if (!response.ok) {
+        throw new Error("Failed to fetch M3U playlist");
+      }
+
+      const playlistData = await response.text();
+      const playlistOrdenada = ordenarPlaylistM3U(playlistData);
+
+      res.writeHead(200, {
+        "Content-Type": "text/plain",
+        "Content-Disposition": "attachment; filename=playlist_ordenada.m3u",
+      });
+      res.end(playlistOrdenada);
+    } catch (error) {
+      console.error("Error:", error.message);
+      res.writeHead(500);
+      res.end("Internal Server Error");
+    }
   } else if (pathname === "/") {
     // Servindo o arquivo index.html
     fs.readFile("./index.html", (err, data) => {
@@ -120,6 +155,39 @@ function validateUrl(url) {
   } catch (error) {
     return false;
   }
+}
+
+// Função para ordenar a playlist .m3u
+function ordenarPlaylistM3U(conteudo) {
+  const linhas = conteudo.split("\n");
+  const canais = [];
+
+  // Iterar pelas linhas e identificar os canais
+  for (let i = 0; i < linhas.length; i++) {
+    const linha_info = linhas[i];
+    const linha_link = linhas[i + 1];
+
+    // Verifica se a linha é um canal (inicia com #EXTINF)
+    if (linha_info.startsWith("#EXTINF")) {
+      canais.push({ info: linha_info, link: linha_link });
+      i++; // Pula a linha do link correspondente
+    }
+  }
+
+  // Ordenar os canais alfabeticamente pelo nome
+  canais.sort((a, b) => {
+    const nomeA = a.info.toLowerCase();
+    const nomeB = b.info.toLowerCase();
+    return nomeA.localeCompare(nomeB);
+  });
+
+  // Reconstruir a playlist ordenada
+  let playlistOrdenada = "#EXTM3U\n";
+  canais.forEach(canal => {
+    playlistOrdenada += `${canal.info}\n${canal.link}\n`;
+  });
+
+  return playlistOrdenada;
 }
 
 function generateRssXml(channel, items) {
