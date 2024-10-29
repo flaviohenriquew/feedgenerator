@@ -3,17 +3,55 @@ const fs = require("fs");
 const url = require("url");
 const { parseString } = require("xml2js");
 
+// Função para ordenar a playlist M3U
+function ordenarPlaylistM3U(conteudo) {
+  const linhas = conteudo.split("\n");
+  const canais = [];
+
+  // Iterar pelas linhas para extrair canais
+  for (let i = 0; i < linhas.length; i++) {
+    const linha_info = linhas[i];
+    const linha_link = linhas[i + 1];
+
+    if (linha_info.startsWith("#EXTINF")) {
+      canais.push({ info: linha_info, link: linha_link });
+      i++; // Pular a próxima linha (link) que já foi adicionada
+    }
+  }
+
+  // Ordenar os canais por nome
+  canais.sort((a, b) => a.info.toLowerCase().localeCompare(b.info.toLowerCase()));
+
+  // Reconstruir a playlist ordenada
+  let playlistOrdenada = "#EXTM3U\n";
+  canais.forEach((canal) => {
+    playlistOrdenada += `${canal.info}\n${canal.link}\n`;
+  });
+
+  return playlistOrdenada;
+}
+
 const server = http.createServer(async (req, res) => {
   const parsedUrl = url.parse(req.url, true);
   const { pathname, query } = parsedUrl;
+  const decodedUrl = decodeURIComponent(req.url);
+
+  if (req.headers.referer) {
+    let referer = req.headers.referer;
+    if (referer.endsWith("/")) {
+      referer = referer.slice(0, -1) + decodedUrl;
+    }
+    console.log(referer);
+    res.setHeader("X-Referer", referer);
+  }
 
   if (pathname.startsWith("/rss")) {
     const rssUrl = decodeURIComponent(query.url);
     const keyword = query.keyword;
 
-//    console.log("pathname:", pathname);
-//    console.log("RSS URL:", rssUrl);
-//    console.log("Keyword:", keyword);
+    // console.log("pathname:", pathname);
+    // console.log("RSS URL:", rssUrl);
+    // console.log("Keyword:", keyword);
 
     if (!rssUrl || !keyword) {
       res.writeHead(400);
@@ -30,6 +68,7 @@ const server = http.createServer(async (req, res) => {
     try {
       const fetch = await import("node-fetch");
       const response = await fetch.default(rssUrl);
+
       if (!response.ok) {
         console.log(response);
         throw new Error("Failed to fetch RSS feed");
@@ -73,13 +112,49 @@ const server = http.createServer(async (req, res) => {
       );
 
       const rssXml = generateRssXml(channel, filteredItems);
+
+      res.writeHead(200, {
+        "Content-Type": "application/xml",
+        Refresh: "900", // Atualiza a página automaticamente a cada 900 segundos (15 minutos)
+      });
+      //    console.log(rssXml);
+      res.end(rssXml);
+    } catch (error) {
+      console.error("Error:", error.message);
+      res.writeHead(500);
+      res.end("Internal Server Error");
+    }
+  } else if (pathname === "/ordenar") {
+    const m3uUrl = query.url;
+
+    if (!m3uUrl) {
+      res.writeHead(400);
+      res.end("Missing URL parameter");
+      return;
+    }
+
+    if (!validateUrl(m3uUrl)) {
+      res.writeHead(400);
+      res.end("Invalid URL");
+      return;
+    }
+
+    try {
+      const fetch = await import("node-fetch");
+      const response = await fetch.default(m3uUrl);
+      
+      if (!response.ok) {
+        throw new Error("Failed to fetch M3U file");
+      }
+      
+      const m3uData = await response.text();
+      const playlistOrdenada = ordenarPlaylistM3U(m3uData);
       
       res.writeHead(200, {
-        'Content-Type': 'application/xml',
-        'Refresh': '900' // Atualiza a página automaticamente a cada 900 segundos (15 minutos)
+        "Content-Type": "text/plain",
+        "Content-Disposition": "attachment; filename=playlist_ordenada.m3u",
       });
-  //    console.log(rssXml);
-      res.end(rssXml);
+      res.end(playlistOrdenada);
     } catch (error) {
       console.error("Error:", error.message);
       res.writeHead(500);
@@ -139,7 +214,7 @@ function generateRssXml(channel, items) {
     `;
 }
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
