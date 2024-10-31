@@ -192,22 +192,29 @@ const server = http.createServer(async (req, res) => {
         const stream = edgeTTS.tts({ text, voice });
         const writeStream = fs.createWriteStream(audioPath);
 
-        for await (const chunk of stream) {
-          writeStream.write(chunk);
-        }
-        writeStream.end();
+        stream.pipe(writeStream);
           
-        console.log("Conversão concluída, enviando áudio...");
-        res.writeHead(200, {
-          "Content-Type": "audio/mpeg",
-          "Content-Disposition": "attachment; filename=output.mp3",
-        });
-        fs.createReadStream(audioPath)
-          .pipe(res)
-          .on("finish", () => {
-            console.log("Áudio enviado, deletando arquivo temporário...");
-            fs.unlinkSync(audioPath);
+        writeStream.on("finish", () => {
+          console.log("Conversão concluída, enviando o arquivo de áudio...");
+          res.writeHead(200, {
+            "Content-Type": "audio/mpeg",
+            "Content-Disposition": "attachment; filename=output.mp3",
           });
+  
+          fs.createReadStream(audioPath)
+            .pipe(res)
+            .on("finish", () => {
+              console.log("Áudio enviado, deletando arquivo temporário...");
+              fs.unlinkSync(audioPath);
+            });
+        });
+
+        writeStream.on("error", (error) => {
+          console.error("Erro ao salvar o áudio:", error);
+          res.writeHead(500);
+          res.end("Erro ao salvar o áudio.");
+        });
+
       } catch (error) {
         console.error("Erro ao gerar o áudio:", error);
         res.writeHead(500);
