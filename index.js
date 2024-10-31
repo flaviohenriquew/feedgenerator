@@ -2,7 +2,17 @@ const http = require("http");
 const fs = require("fs");
 const url = require("url");
 const { parseString } = require("xml2js");
+const eedgeTTS = require('edge-tts');
 
+async function getVoicesByLanguage(languageCode) {
+  const voices = await edgeTTS.voices();
+  return voices.filter(voice => voice.Locale === languageCode);
+}
+app.get('/get-voices', async (req, res) => {
+  const languageCode = req.query.language || 'pt-BR';
+  const voices = await getVoicesByLanguage(languageCode);
+  res.json(voices);
+});
 // Função para ordenar a playlist M3U
 function ordenarPlaylistM3U(conteudo) {
   const linhas = conteudo.split("\n");
