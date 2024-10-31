@@ -184,11 +184,19 @@ const server = http.createServer(async (req, res) => {
       try {
         console.log("Tentando importar edge-tts...");
         const edgeTTS = await import("edge-tts/out/index.js"); //const edgeTTS = await import("edge-tts"); // Importa dinamicamente o edge-tts
-        console.log("edge-tts importado com sucesso");
+        console.log("edge-tts importado com sucesso:", edgeTTS);
   
         const audioPath = "./output.mp3";
         console.log("Iniciando a conversão do texto para áudio...");
-        await edgeTTS.default.convert({ text, voice, writeMedia: audioPath });
+
+        if (edgeTTS.default && edgeTTS.default.convert) {
+          await edgeTTS.default.convert({ text, voice, writeMedia: audioPath });
+        } else {
+          console.error("Método 'convert' não encontrado em edgeTTS.");
+          res.writeHead(500);
+          res.end("Erro: Método 'convert' não encontrado.");
+          return;
+        }
   
         console.log("Conversão concluída, enviando áudio...");
         res.writeHead(200, {
