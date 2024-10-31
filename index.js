@@ -2,6 +2,7 @@ const http = require("http");
 const fs = require("fs");
 const url = require("url");
 const { parseString } = require("xml2js");
+const edgeTTS = require("edge-tts");
 
 // Função para ordenar a playlist M3U
 function ordenarPlaylistM3U(conteudo) {
@@ -160,6 +161,32 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(500);
       res.end("Internal Server Error");
     }
+  } else if (pathname === "/generate-audio") {
+    let body = "";
+    req.on("data", chunk => body += chunk);
+    req.on("end", async () => {
+      const { text, voice } = JSON.parse(body);
+
+      if (!text || !voice) {
+        res.writeHead(400);
+        res.end("Texto e voz são obrigatórios");
+        return;
+      }
+
+      try {
+        const audioPath = "./output.mp3";
+        await edgeTTS.convert({ text, voice, writeMedia: audioPath });
+        res.writeHead(200, {
+          "Content-Type": "audio/mpeg",
+          "Content-Disposition": "attachment; filename=output.mp3",
+        });
+        fs.createReadStream(audioPath).pipe(res).on("finish", () => fs.unlinkSync(audioPath));
+      } catch (error) {
+        console.error("Erro ao gerar o áudio:", error);
+        res.writeHead(500);
+        res.end("Erro ao gerar o áudio.");
+      }
+    });
   } else if (pathname === "/") {
     // Servindo o arquivo index.html
     fs.readFile("./index.html", (err, data) => {
