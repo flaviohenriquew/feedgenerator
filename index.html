@@ -49,10 +49,7 @@
       <h2 class="mb-4">Gerador de Áudio TTS</h2>
       <div class="form-group">
         <label for="voiceSelect">Selecione a Voz</label>
-        <select class="form-control" id="voiceSelect">
-          <option value="pt-BR-FranciscaNeural">Francisca</option>
-          <option value="pt-BR-AntonioNeural">Antonio</option>
-        </select>
+        <select class="form-control" id="voiceSelect"></select>
       </div>
       <div class="form-group">
         <label for="text">Digite o Texto</label>
@@ -101,6 +98,21 @@
 
       // Função para gerar áudio TTS
       $(document).ready(function () {
+         $.ajax({
+          url: '/get-voices?language=pt-BR',
+          type: 'GET',
+          success: function(voices) {
+            const voiceSelect = $('#voiceSelect');
+            voiceSelect.empty(); // Limpa opções atuais
+            voices.forEach(voice => {
+              const option = $('<option></option>').val(voice.ShortName).text(voice.DisplayName);
+              voiceSelect.append(option);
+            });
+          },
+          error: function() {
+            alert('Erro ao carregar as vozes.');
+          }
+        });
         $('#generateButton').click(function() {
           const text = $('#text').val();
           const voice = $('#voiceSelect').val();
