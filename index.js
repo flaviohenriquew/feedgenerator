@@ -162,6 +162,7 @@ const server = http.createServer(async (req, res) => {
     }
   } else if (pathname === "/generate-audio") {
     let body = "";
+
     req.on("data", (chunk) => (body += chunk));
     req.on("end", async () => {
       console.log("Recebido body:", body);
@@ -188,34 +189,25 @@ const server = http.createServer(async (req, res) => {
         console.log("Tentando importar edge-tts...");
         const edgeTTS = await import("edge-tts/out/index.js"); //const edgeTTS = await import("edge-tts"); // Importa dinamicamente o edge-tts
         console.log("edge-tts importado com sucesso:", edgeTTS);
+        const availableVoices = await edgeTTS.getVoices();
+        console.log("Vozes disponíveis:", availableVoices);
   
         const audioPath = "./output.mp3";
         console.log("Iniciando a conversão do texto para áudio...");
         
-        const stream = edgeTTS.tts({ text, voice });
-        const writeStream = fs.createWriteStream(audioPath);
+        await edgeTTS.ttsSave(audioPath, { text, voice });
 
-        stream.pipe(writeStream);
-          
-        writeStream.on("finish", () => {
-          console.log("Conversão concluída, enviando o arquivo de áudio...");
-          res.writeHead(200, {
-            "Content-Type": "audio/mpeg",
-            "Content-Disposition": "attachment; filename=output.mp3",
-          });
-  
-          fs.createReadStream(audioPath)
-            .pipe(res)
-            .on("finish", () => {
-              console.log("Áudio enviado, deletando arquivo temporário...");
-              fs.unlinkSync(audioPath);
-            });
+        console.log("Conversão concluída, enviando o arquivo de áudio...");
+        res.writeHead(200, {
+          "Content-Type": "audio/mpeg",
+          "Content-Disposition": "attachment; filename=output.mp3",
         });
-
-        writeStream.on("error", (error) => {
-          console.error("Erro ao salvar o áudio:", error);
-          res.writeHead(500);
-          res.end("Erro ao salvar o áudio.");
+            
+        fs.createReadStream(audioPath)
+        .pipe(res)
+        .on("finish", () => {
+          console.log("Áudio enviado, deletando arquivo temporário...");
+          fs.unlinkSync(audioPath);
         });
 
       } catch (error) {
