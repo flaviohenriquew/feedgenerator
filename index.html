@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Feed RSS com filtro</title>
+    <title>Feed RSS com Filtro</title>
     <!-- Adiciona o CSS do Bootstrap -->
     <link
       rel="stylesheet"
@@ -10,7 +10,7 @@
   </head>
   <body>
     <div class="container mt-5">
-      <h1 class="mb-4">Feed RSS com filtro</h1>
+      <h1 class="mb-4">Feed RSS com Filtro</h1>
       <form action="./rss" method="get">
         <div class="form-group">
           <label for="url">URL do feed RSS:</label>
@@ -42,20 +42,108 @@
         >Acessar RSS filtrado</a
       >
     </div>
-    <!-- Adiciona o JavaScript do Bootstrap -->
+
+    <!-- Nova seção: TTS (Text-to-Speech) -->
+    <div class="container mt-5">
+      <h2 class="mb-4">Gerador de Áudio TTS</h2>
+      <div class="form-group">
+        <label for="voiceSelect">Selecione a Voz</label>
+        <select class="form-control" id="voiceSelect">
+          <option value="pt-BR-FranciscaNeural">Francisca</option>
+          <option value="pt-BR-AntonioNeural">Antonio</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="text">Digite o Texto</label>
+        <textarea
+          class="form-control"
+          id="text"
+          rows="3"
+          placeholder="Digite o texto para gerar áudio"
+        ></textarea>
+      </div>
+      <button class="btn btn-primary" id="generateButton">Gerar Áudio</button>
+    </div>
+
+    <!-- Nova seção: Organizador de Playlist M3U -->
+    <div class="container mt-5">
+      <h2 class="mb-4">Organizar Playlist M3U</h2>
+      <div class="form-group">
+        <label for="playlistUrl">URL da Playlist M3U</label>
+        <input
+          type="text"
+          class="form-control"
+          id="playlistUrl"
+          placeholder="Insira a URL da playlist M3U"
+        />
+      </div>
+      <button class="btn btn-success" id="sortPlaylistButton">
+        Ordenar e Baixar
+      </button>
+    </div>
+
+    <!-- JavaScript do Bootstrap e funcionalidades adicionais -->
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
     <script>
+      // Fetch para exibir o cabeçalho Referer do RSS
       fetch(
         "https://feedgenerator.tech/rss?url=https://bj-share.info/feed.php?u:184515;f;c:1;l;h:3f9d0d45&keyword=Dual"
-      ) // Faça uma solicitação para o servidor
+      )
         .then((response) => {
-          const referer = response.headers.get("X-Referer"); // Acessando o cabeçalho personalizado
-          console.log("Referer:", referer); // Exibindo o referer no console do navegador
+          const referer = response.headers.get("X-Referer");
+          console.log("Referer:", referer);
           return response.text();
         })
         .catch((error) => console.error("Ocorreu um erro:", error));
+
+      // Função para gerar áudio TTS
+      $(document).ready(function () {
+        $("#generateButton").click(function () {
+          const text = $("#text").val();
+          const voice = $("#voiceSelect").val();
+
+          if (!text || !voice) {
+            alert("Por favor, selecione a voz e insira o texto.");
+            return;
+          }
+
+          $.ajax({
+            url: "/generate-audio",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({ text, voice }),
+            xhrFields: { responseType: "blob" },
+            success: function (blob) {
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = "output.mp3";
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+              window.URL.revokeObjectURL(url);
+            },
+            error: function () {
+              alert("Erro ao gerar o áudio.");
+            },
+          });
+        });
+
+        // Função para ordenar a playlist M3U
+        $("#sortPlaylistButton").click(function () {
+          const playlistUrl = $("#playlistUrl").val();
+          if (!playlistUrl) {
+            alert("Por favor, insira a URL da playlist.");
+            return;
+          }
+
+          window.location.href = `/ordenar?url=${encodeURIComponent(
+            playlistUrl
+          )}`;
+        });
+      });
     </script>
   </body>
 </html>
