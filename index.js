@@ -183,7 +183,7 @@ const server = http.createServer(async (req, res) => {
   
       try {
         console.log("Tentando importar edge-tts...");
-        const edgeTTS = await import("edge-tts"); // Importa dinamicamente o edge-tts
+        const edgeTTS = await import("edge-tts/out/index.js"); //const edgeTTS = await import("edge-tts"); // Importa dinamicamente o edge-tts
         console.log("edge-tts importado com sucesso");
   
         const audioPath = "./output.mp3";
