@@ -2,7 +2,6 @@ const http = require("http");
 const fs = require("fs");
 const url = require("url");
 const { parseString } = require("xml2js");
-const edgeTTS = require("edge-tts");
 
 // Função para ordenar a playlist M3U
 function ordenarPlaylistM3U(conteudo) {
@@ -174,8 +173,9 @@ const server = http.createServer(async (req, res) => {
       }
 
       try {
+        const edgeTTS = await import("edge-tts"); // Importa dinamicamente o edge-tts
         const audioPath = "./output.mp3";
-        await edgeTTS.convert({ text, voice, writeMedia: audioPath });
+        await edgeTTS.default.convert({ text, voice, writeMedia: audioPath });
         res.writeHead(200, {
           "Content-Type": "audio/mpeg",
           "Content-Disposition": "attachment; filename=output.mp3",
