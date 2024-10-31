@@ -160,27 +160,47 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(500);
       res.end("Internal Server Error");
     }
-  } else if (pathname === "/generate-audio") {
+  } if (pathname === "/generate-audio") {
     let body = "";
-    req.on("data", chunk => body += chunk);
+    req.on("data", (chunk) => (body += chunk));
     req.on("end", async () => {
-      const { text, voice } = JSON.parse(body);
-
+      console.log("Recebido body:", body);
+      let text, voice;
+      try {
+        ({ text, voice } = JSON.parse(body));
+      } catch (parseError) {
+        console.error("Erro ao fazer o parse do JSON:", parseError);
+        res.writeHead(400);
+        res.end("Formato JSON inválido");
+        return;
+      }
+  
       if (!text || !voice) {
         res.writeHead(400);
         res.end("Texto e voz são obrigatórios");
         return;
       }
-
+  
       try {
+        console.log("Tentando importar edge-tts...");
         const edgeTTS = await import("edge-tts"); // Importa dinamicamente o edge-tts
+        console.log("edge-tts importado com sucesso");
+  
         const audioPath = "./output.mp3";
+        console.log("Iniciando a conversão do texto para áudio...");
         await edgeTTS.default.convert({ text, voice, writeMedia: audioPath });
+  
+        console.log("Conversão concluída, enviando áudio...");
         res.writeHead(200, {
           "Content-Type": "audio/mpeg",
           "Content-Disposition": "attachment; filename=output.mp3",
         });
-        fs.createReadStream(audioPath).pipe(res).on("finish", () => fs.unlinkSync(audioPath));
+        fs.createReadStream(audioPath)
+          .pipe(res)
+          .on("finish", () => {
+            console.log("Áudio enviado, deletando arquivo temporário...");
+            fs.unlinkSync(audioPath);
+          });
       } catch (error) {
         console.error("Erro ao gerar o áudio:", error);
         res.writeHead(500);
