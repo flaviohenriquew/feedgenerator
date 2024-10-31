@@ -160,14 +160,17 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(500);
       res.end("Internal Server Error");
     }
-  } if (pathname === "/generate-audio") {
+  } else if (pathname === "/generate-audio") {
     let body = "";
     req.on("data", (chunk) => (body += chunk));
     req.on("end", async () => {
       console.log("Recebido body:", body);
+
       let text, voice;
       try {
         ({ text, voice } = JSON.parse(body));
+        console.log("Texto:", text);
+        console.log("Voz:", voice);
       } catch (parseError) {
         console.error("Erro ao fazer o parse do JSON:", parseError);
         res.writeHead(400);
