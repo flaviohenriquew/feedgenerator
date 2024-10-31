@@ -193,8 +193,13 @@ const server = http.createServer(async (req, res) => {
         const audioPath = "/tmp/output.mp3";
         console.log("Iniciando a conversão do texto para áudio...");
         
-        await edgeTTS.ttsSave(Buffer.from(audioPath), { text, voice });
-
+        await edgeTTS.ttsSave(text, audioPath, {
+          voice: voice,
+          volume: '+0%', // Volume padrão, pode ser ajustado
+          rate: '+0%', // Velocidade padrão
+          pitch: '+0Hz' // Tom padrão
+        });
+        
         console.log("Conversão concluída, enviando o arquivo de áudio...");
         res.writeHead(200, {
           "Content-Type": "audio/mpeg",
