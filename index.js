@@ -5,7 +5,7 @@ const { parseString } = require("xml2js");
 const eedgeTTS = require('edge-tts');
 
 async function getVoicesByLanguage(languageCode) {
-  const voices = await edgeTTS.voices();
+  const voices = await eedgeTTS.voices();
   return voices.filter(voice => voice.Locale === languageCode);
 }
 app.get('/get-voices', async (req, res) => {
