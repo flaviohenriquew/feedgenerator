@@ -100,36 +100,37 @@
 
       // Função para gerar áudio TTS
       $(document).ready(function () {
-        $("#generateButton").click(function () {
-          const text = $("#text").val();
-          const voice = $("#voiceSelect").val();
-
+        $('#generateButton').click(function() {
+          const text = $('#text').val();
+          const voice = $('#voiceSelect').val();
+      
           if (!text || !voice) {
-            alert("Por favor, selecione a voz e insira o texto.");
+            alert('Por favor, selecione a voz e insira o texto.');
             return;
           }
-
+      
           $.ajax({
-            url: "/generate-audio",
-            type: "POST",
-            contentType: "application/json",
+            url: '/generate-audio',
+            type: 'POST',
+            contentType: 'application/json',
             data: JSON.stringify({ text, voice }),
-            xhrFields: { responseType: "blob" },
-            success: function (blob) {
+            xhrFields: { responseType: 'blob' },
+            success: function(blob) {
               const url = window.URL.createObjectURL(blob);
-              const a = document.createElement("a");
+              const a = document.createElement('a');
               a.href = url;
-              a.download = "output.mp3";
+              a.download = 'output.mp3';
               document.body.appendChild(a);
               a.click();
               a.remove();
               window.URL.revokeObjectURL(url);
             },
-            error: function () {
-              alert("Erro ao gerar o áudio.");
-            },
+            error: function() {
+              alert('Erro ao gerar o áudio.');
+            }
           });
         });
+      });
 
         // Função para ordenar a playlist M3U
         $("#sortPlaylistButton").click(function () {
