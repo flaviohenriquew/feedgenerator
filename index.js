@@ -188,16 +188,9 @@ const server = http.createServer(async (req, res) => {
   
         const audioPath = "./output.mp3";
         console.log("Iniciando a conversão do texto para áudio...");
-
-        if (edgeTTS.default && edgeTTS.default.convert) {
-          await edgeTTS.default.convert({ text, voice, writeMedia: audioPath });
-        } else {
-          console.error("Método 'convert' não encontrado em edgeTTS.");
-          res.writeHead(500);
-          res.end("Erro: Método 'convert' não encontrado.");
-          return;
-        }
-  
+        
+        await edgeTTS.ttsSave({ text, voice, filePath: audioPath });
+          
         console.log("Conversão concluída, enviando áudio...");
         res.writeHead(200, {
           "Content-Type": "audio/mpeg",
