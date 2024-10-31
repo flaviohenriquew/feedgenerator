@@ -189,7 +189,13 @@ const server = http.createServer(async (req, res) => {
         const audioPath = "./output.mp3";
         console.log("Iniciando a conversão do texto para áudio...");
         
-        await edgeTTS.ttsSave(audioPath, { text, voice });
+        const stream = edgeTTS.tts({ text, voice });
+        const writeStream = fs.createWriteStream(audioPath);
+
+        for await (const chunk of stream) {
+          writeStream.write(chunk);
+        }
+        writeStream.end();
           
         console.log("Conversão concluída, enviando áudio...");
         res.writeHead(200, {
