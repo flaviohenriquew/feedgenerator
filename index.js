@@ -189,13 +189,11 @@ const server = http.createServer(async (req, res) => {
         console.log("Tentando importar edge-tts...");
         const edgeTTS = await import("edge-tts/out/index.js"); //const edgeTTS = await import("edge-tts"); // Importa dinamicamente o edge-tts
         console.log("edge-tts importado com sucesso:", edgeTTS);
-        const availableVoices = await edgeTTS.getVoices();
-        console.log("Vozes disponíveis:", availableVoices);
-  
-        const audioPath = "./output.mp3";
+          
+        const audioPath = "/tmp/output.mp3";
         console.log("Iniciando a conversão do texto para áudio...");
         
-        await edgeTTS.ttsSave(audioPath, { text, voice });
+        await edgeTTS.ttsSave(Buffer.from(audioPath), { text, voice });
 
         console.log("Conversão concluída, enviando o arquivo de áudio...");
         res.writeHead(200, {
