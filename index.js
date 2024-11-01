@@ -2,24 +2,12 @@ const http = require("http");
 const fs = require("fs");
 const url = require("url");
 const { parseString } = require("xml2js");
-const express = require('express');
-const app = express();
-
-let eedgeTTS;
 
 async function getVoicesByLanguage(languageCode) {
-  if (!eedgeTTS) {
-    eedgeTTS = await import("edge-tts/out/index.js");
-  }
-  const voices = await eedgeTTS.voices();
+  const edgeTTS = await import("edge-tts/out/index.js");
+  const voices = await edgeTTS.getVoices(); // Substitua `voices` por `getVoices`
   return voices.filter(voice => voice.Locale === languageCode);
 }
-
-app.get('/get-voices', async (req, res) => {
-  const languageCode = req.query.language || 'pt-BR';
-  const voices = await getVoicesByLanguage(languageCode);
-  res.json(voices);
-});
 
 // Função para ordenar a playlist M3U
 function ordenarPlaylistM3U(conteudo) {
@@ -178,6 +166,44 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(500);
       res.end("Internal Server Error");
     }
+  } else if (pathname === "/get-voices") {
+    const languageCode = query.language || 'pt-BR';
+    const voices = await getVoicesByLanguage(languageCode);
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify(voices));
+  } else if (pathname === "/get-languages") {
+
+    try {
+      const edgeTTS = await import("edge-tts/out/index.js");
+      const voices = await edgeTTS.getVoices();
+    
+      // Extraia os idiomas únicos das vozes
+      const languages = [...new Set(voices.map(voice => voice.Locale))];
+      
+      // Envia a resposta JSON manualmente
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify(languages));
+    } catch (error) {
+      console.error("Erro ao obter idiomas:", error);
+      
+      // Envia a mensagem de erro em caso de falha
+      res.writeHead(500, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ message: "Erro ao carregar os idiomas." }));
+    }
+
+  } else if (pathname === "/get-voice-effects") {
+    try {
+      const edgeTTS = await import("edge-tts/out/index.js");
+      const categories = edgeTTS.Categories || [];
+      const personalities = edgeTTS.Personalities || [];
+  
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ categories, personalities }));
+    } catch (error) {
+      console.error("Erro ao obter categorias e personalidades:", error);
+      res.writeHead(500);
+      res.end(JSON.stringify({ message: "Erro ao carregar efeitos de voz." }));
+    }
   } else if (pathname === "/generate-audio") {
     let body = "";
 
@@ -185,11 +211,17 @@ const server = http.createServer(async (req, res) => {
     req.on("end", async () => {
       console.log("Recebido body:", body);
 
-      let text, voice;
+      let text, voice, volume, speed, pitch, format, category, personality;
       try {
-        ({ text, voice } = JSON.parse(body));
+        ({ text, voice, volume, speed, pitch, format, category, personality } = JSON.parse(body));
         console.log("Texto:", text);
         console.log("Voz:", voice);
+        console.log("Volume:", volume);
+        console.log("Velocidade:", speed);
+        console.log("Pitch:", pitch);
+        console.log("Formato:", format);
+        console.log("Categoria:", category);
+        console.log("Personalidade:", personality);
       } catch (parseError) {
         console.error("Erro ao fazer o parse do JSON:", parseError);
         res.writeHead(400);
@@ -207,21 +239,25 @@ const server = http.createServer(async (req, res) => {
         console.log("Tentando importar edge-tts...");
         const edgeTTS = await import("edge-tts/out/index.js"); //const edgeTTS = await import("edge-tts"); // Importa dinamicamente o edge-tts
         console.log("edge-tts importado com sucesso:", edgeTTS);
-          
-        const audioPath = "/tmp/output.mp3";
+        
+        // Define o caminho do arquivo de saída com base no formato
+        const fileExtension = format.includes("MP3") ? "mp3" : "wav";
+        const audioPath = `/tmp/output.${fileExtension}`;
         console.log("Iniciando a conversão do texto para áudio...");
         
         await edgeTTS.ttsSave(text, audioPath, {
           voice: voice,
-          volume: '+0%', // Volume padrão, pode ser ajustado
-          rate: '+0%', // Velocidade padrão
-          pitch: '+0Hz' // Tom padrão
+          volume: `${volume}%` || '+0%', // Volume padrão se não especificado
+          rate: `${speed}%` || '+0%',    // Velocidade padrão se não especificado
+          pitch: `${pitch}Hz` || '+0Hz',   // Pitch padrão se não especificado
+          category: category || 'Default',     // Define 'Default' caso category não seja fornecida
+          personality: personality || 'Default' // Define 'Default' caso personality não seja fornecida
         });
         
         console.log("Conversão concluída, enviando o arquivo de áudio...");
         res.writeHead(200, {
-          "Content-Type": "audio/mpeg",
-          "Content-Disposition": "attachment; filename=output.mp3",
+          "Content-Type": fileExtension === "mp3" ? "audio/mpeg" : "audio/wav",
+          "Content-Disposition": `attachment; filename=output.${fileExtension}`,
         });
             
         fs.createReadStream(audioPath)
