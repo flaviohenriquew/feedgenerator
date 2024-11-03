@@ -5,7 +5,23 @@ export function setupAudioPreview() {
     const audioElement = document.getElementById('audioPreview');
     const downloadButton = document.getElementById('downloadButton');
 
+    // Define uma função de download que será usada apenas uma vez por geração de áudio
+    let currentDownloadUrl = null;
+
+    function handleDownload() {
+        if (!currentDownloadUrl) return;
+        const a = document.createElement('a');
+        a.href = currentDownloadUrl;
+        a.download = 'output.mp3';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+
     generateButton.addEventListener('click', () => {
+        // Desabilita o botão para evitar cliques múltiplos enquanto o áudio é processado
+        generateButton.disabled = true;
+
         // Obtenha os valores do texto e dos controles deslizantes
         const text = document.getElementById('text').value;
         const voice = document.getElementById('voiceSelect').value;
@@ -19,6 +35,7 @@ export function setupAudioPreview() {
 
         if (!text || !voice) {
             alert('Por favor, selecione a voz e insira o texto.');
+            generateButton.disabled = false; // Reabilita o botão
             return;
         }
 
@@ -42,20 +59,21 @@ export function setupAudioPreview() {
         })
         .then(response => response.blob())
         .then(blob => {
-            const url = URL.createObjectURL(blob);
+            // Cria um URL para o novo blob de áudio e armazena em currentDownloadUrl
+            currentDownloadUrl = URL.createObjectURL(blob);
             
             // Configura o player de áudio
-            audioElement.src = url;
+            audioElement.src = currentDownloadUrl;
             audioPreviewContainer.style.display = 'block';
 
-            // Adiciona o evento 'canplay' para garantir que o áudio seja carregado antes de iniciar a reprodução
+            // Reproduz o áudio assim que ele estiver pronto
             audioElement.addEventListener('canplay', () => {
                 audioElement.play().catch(error => {
                     console.error('Erro ao reproduzir o áudio:', error);
                 });
             }, { once: true }); // Ouvinte é executado apenas uma vez
 
-            // Inicialize o MediaElement.js no player de áudio
+            // Inicializa o MediaElement.js no player de áudio
             new MediaElementPlayer(audioElement, {
                 features: ['playpause', 'progress', 'current', 'duration', 'volume', 'download'],
                 enableAutosize: true,
@@ -64,16 +82,16 @@ export function setupAudioPreview() {
                 }
             });
 
-            // Configura o botão de download
-            downloadButton.addEventListener('click', () => {
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'output.mp3';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-            });
+            // Remove ouvintes antigos e adiciona um novo para o URL atual
+            downloadButton.removeEventListener('click', handleDownload);
+            downloadButton.addEventListener('click', handleDownload);
+
+            // Reabilita o botão de geração de áudio
+            generateButton.disabled = false;
         })
-        .catch(() => alert('Erro ao gerar o áudio.'));
+        .catch(() => {
+            alert('Erro ao gerar o áudio.');
+            generateButton.disabled = false; // Reabilita o botão em caso de erro
+        });
     });
 }
