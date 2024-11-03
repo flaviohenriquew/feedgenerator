@@ -5,7 +5,6 @@ export function loadLanguages() {
         type: 'GET',
         success: function(languages) {
             const languageSelect = $('#languageSelect');
-            const languageButton = $('#languageButton');
             languageSelect.empty(); // Limpa as opções atuais
 
             // Mapeamento de códigos de idiomas para nomes amigáveis
@@ -160,7 +159,6 @@ export function loadLanguages() {
 
             // Define o idioma padrão
             languageSelect.val("pt-BR");
-            languageButton.text(languageMap["pt-BR"] || "Português (Brasil)");
 
             // Carrega as vozes para o idioma padrão
             loadVoices("pt-BR");
@@ -178,7 +176,6 @@ export function loadVoices(languageCode) {
         type: 'GET',
         success: function(voices) {
             const voiceSelect = $('#voiceSelect');
-            const voiceButton = $('#voiceButton');
             voiceSelect.empty(); // Limpa as opções atuais
 
             voices.forEach(voice => {
@@ -190,7 +187,7 @@ export function loadVoices(languageCode) {
             const firstVoice = voices[0];
             if (firstVoice) {
                 voiceSelect.val(firstVoice.ShortName);
-                voiceButton.text(firstVoice.FriendlyName);
+                //voiceButton.text(firstVoice.FriendlyName);
             }
         },
         error: function() {
@@ -199,16 +196,13 @@ export function loadVoices(languageCode) {
     });
 }
 
-// Funções para atualizar o idioma e a voz selecionados no botão
-export function updateLanguage() {
-    const languageSelect = document.getElementById("languageSelect");
-    const selectedLanguage = languageSelect.options[languageSelect.selectedIndex].text;
-    document.getElementById("languageButton").textContent = selectedLanguage;
-    loadVoices(languageSelect.value); // Carrega vozes para o idioma selecionado
-}
+// Evento para carregar as vozes quando o usuário seleciona um idioma
+$(document).ready(() => {
+    $('#languageSelect').on('change', function() {
+        const selectedLanguage = $(this).val();
+        loadVoices(selectedLanguage);
+    });
 
-export function updateVoice() {
-    const voiceSelect = document.getElementById("voiceSelect");
-    const selectedVoice = voiceSelect.options[voiceSelect.selectedIndex].text;
-    document.getElementById("voiceButton").textContent = selectedVoice;
-}
+    // Carrega os idiomas ao carregar a página
+    loadLanguages();
+});

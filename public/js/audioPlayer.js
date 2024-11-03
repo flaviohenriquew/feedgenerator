@@ -75,8 +75,12 @@ export function setupAudioPreview() {
 
             // Inicializa o MediaElement.js no player de áudio
             new MediaElementPlayer(audioElement, {
-                features: ['playpause', 'progress', 'current', 'duration', 'volume', 'download'],
+                features: ['playpause', 'progress', 'current', 'duration', 'volume', 'loop', 'download'],
+                audioVolume: 'horizontal',
+                defaultSeekBackwardInterval: 5,
+                defaultSeekForwardInterval: 5,
                 enableAutosize: true,
+                enableKeyboard: true,
                 success: function(media) {
                     media.setCurrentTime(0);  // Reseta o tempo para 0 quando o áudio termina
                 }

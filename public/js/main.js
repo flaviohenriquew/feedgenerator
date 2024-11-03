@@ -1,5 +1,5 @@
 // Importar funções de outros módulos
-import { loadLanguages, loadVoices, updateVoice, updateLanguage } from './tts.js';
+import { loadLanguages, loadVoices } from './tts.js';
 import { loadVoiceEffects } from './voiceEffects.js';
 import { initializeRSSFetch } from './rss.js';
 import { initializeCharacterCounter, initializeSliders } from './utils.js';
@@ -24,11 +24,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Inicializa a funcionalidade de ordenação de playlist M3U
     initializePlaylistSorting();
 
-    // Adiciona event listeners para atualizar o idioma e a voz selecionados
-    document.getElementById('languageSelect').addEventListener('change', updateLanguage);
-    document.getElementById('voiceSelect').addEventListener('change', updateVoice);
-
-    // Event listeners para os botões de confirmação do modal
-    document.querySelector('#languageModal .btn-primary').addEventListener('click', updateLanguage);
-    document.querySelector('#voiceModal .btn-primary').addEventListener('click', updateVoice);
+    // Adiciona event listener para atualizar as vozes quando o idioma é alterado
+    document.getElementById('languageSelect').addEventListener('change', (event) => {
+        const selectedLanguage = event.target.value;
+        loadVoices(selectedLanguage);
+    });
+    
 });
