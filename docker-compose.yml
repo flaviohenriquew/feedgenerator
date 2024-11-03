@@ -10,8 +10,8 @@ services:
       - "3001:3001"
     volumes:
       - .:/app
+    working_dir: /app
     environment:
       - PORT=3001
-    command: ["npm", "start"]
+    command: ["node", "index.js"]  # Usa node diretamente para rodar o index.js
     restart: always
-
