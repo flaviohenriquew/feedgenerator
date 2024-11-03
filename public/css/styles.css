@@ -1,0 +1,136 @@
+.container {
+    max-width: 1100px;
+}
+
+/* Estilo personalizado */
+.container {
+    max-width: 1100px; /* Aumente o valor para expandir a largura */
+  }
+
+  h2 {
+    font-weight: bold;
+    color: #333;
+  }
+
+  .nav-pills .nav-link {
+    border-radius: 20px;
+    padding: 8px 18px;
+    font-weight: bold;
+  }
+
+  .nav-pills .nav-link.active {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .row {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .col-md-6 {
+    padding: 15px;
+  }
+
+  .card {
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+  }
+
+  #categoryContainer, #personalityContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); /* Ajuste para distribuir os itens horizontalmente */
+    gap: 12px;
+  }
+
+  .toggle-button {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 500;
+    color: #555;
+    background-color: #f8f9fa;
+    transition: all 0.3s;
+    text-align: center;
+  }
+
+  .toggle-button.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-group label {
+    font-weight: bold;
+    color: #333;
+  }
+
+  .form-control {
+    height: 45px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    transition: border-color 0.3s;
+    font-size: 16px;
+  }
+
+  .form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0px 0px 5px rgba(0, 123, 255, 0.3);
+  }
+
+  textarea.form-control {
+    resize: none;
+    height: 350px;
+    border-radius: 8px;
+  }
+
+  #generateButton {
+    padding: 12px 35px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 8px;
+    background-color: #007bff;
+    color: white;
+    transition: background-color 0.3s;
+  }
+
+  #generateButton:hover {
+    background-color: #0056b3;
+    color: white;
+  }
+
+  .audio-player-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+    justify-content: center;
+  }
+
+  audio {
+    width: 80%;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  #downloadButton {
+    background-color: #007bff;
+    border: none;
+    padding: 5px 15px;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+  }
+
+  #downloadButton:hover {
+    background-color: #0056b3;
+  }
+  .custom-width {
+      max-width: 60%; /* Ajuste este valor conforme desejado */
+  }
