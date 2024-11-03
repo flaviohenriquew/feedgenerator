@@ -3,10 +3,6 @@
 }
 
 /* Estilo personalizado */
-.container {
-    max-width: 1100px; /* Aumente o valor para expandir a largura */
-  }
-
   h2 {
     font-weight: bold;
     color: #333;
@@ -132,5 +128,54 @@
     background-color: #0056b3;
   }
   .custom-width {
-      max-width: 60%; /* Ajuste este valor conforme desejado */
+      max-width: 65%; /* Ajuste este valor conforme desejado */
   }
+
+/* Estilo do select como botão */
+.select-style {
+  border: 1px solid #007bff; /* Azul suave */
+  color: #007bff;
+  background-color: transparent;
+  border-radius: 15px;
+  padding: 6px 14px; /* Ajuste para manter a altura e espaço adequados */
+  font-weight: normal; /* Define o peso da fonte como normal */
+  font-size: 0.7rem; /* Reduz o tamanho da fonte para caber mais texto */
+  text-align: center;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='%23007bff' d='M5.5 7l4.5 4 4.5-4h-9z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 10px;
+  cursor: pointer;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.select-style:hover {
+  background-color: #e6f0ff;
+  color: #0056b3;
+}
+
+.select-style:focus {
+  border-color: #0056b3;
+  outline: none;
+}
+
+/* Estilo do dropdown quando aberto */
+.select-style option {
+  padding: 10px;
+  background-color: #ffffff;
+  color: #007bff;
+  font-weight: normal; /* Texto normal nas opções */
+  border: none;
+  font-size: 0.7rem; /* Garante que o tamanho do texto nas opções seja consistente */
+}
+
+.select-style option:hover {
+  background-color: #e6f0ff;
+  color: #0056b3;
+}
