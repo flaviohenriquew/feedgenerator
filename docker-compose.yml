@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   nodejs:
     container_name: nodejs_server
@@ -15,3 +13,16 @@ services:
       - PORT=3001
     command: ["node", "index.js"]  # Usa node diretamente para rodar o index.js
     restart: always
+    networks:
+     - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.hello_world.rule=Host(`feedgenerator.xyz`)"
+      - "traefik.http.routers.hello_world.tls=true"
+      - "traefik.http.routers.hello_world.tls.certresolver=lets-encrypt"
+      - "traefik.http.services.hello_world.loadbalancer.server.port=3001"
+      - "traefik.docker.network=web"
+
+networks:
+  web:
+    external: true
