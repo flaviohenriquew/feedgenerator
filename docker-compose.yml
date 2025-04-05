@@ -17,10 +17,10 @@ services:
      - web
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.hello_world.rule=Host(`feedgenerator.xyz`)"
-      - "traefik.http.routers.hello_world.tls=true"
-      - "traefik.http.routers.hello_world.tls.certresolver=lets-encrypt"
-      - "traefik.http.services.hello_world.loadbalancer.server.port=3001"
+      - "traefik.http.routers.nodejsserver.rule=Host(`feedgenerator.xyz`)"
+      - "traefik.http.routers.nodejsserver.tls=true"
+      - "traefik.http.routers.nodejsserver.tls.certresolver=lets-encrypt"
+      - "traefik.http.services.nodejsserver.loadbalancer.server.port=3001"
       - "traefik.docker.network=web"
 
 networks:
